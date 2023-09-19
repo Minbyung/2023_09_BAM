@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 public class Main {
 	static List<Article> articles = new ArrayList<Article>();
+	static List<Member> members = new ArrayList<Member>();
 
 	public static void main(String[] args) {
 
@@ -12,7 +13,9 @@ public class Main {
 		makeTestData();
 
 		Scanner sc = new Scanner(System.in);
+
 		int lastArticleId = 5;
+		int lastMemberId = 0;
 
 		while (true) {
 
@@ -28,7 +31,41 @@ public class Main {
 				break;
 			}
 
-			if (command.startsWith("article list")) {
+			if (command.equals("member join")) {
+				int id = lastMemberId + 1;
+				String regDate = Util.getNow();
+				String loginId = null;
+
+				while (true) {
+					System.out.printf("로그인 아이디 : ");
+					loginId = sc.nextLine();
+
+					if (loginId.length() == 0) {
+						System.out.println("아이디 입력해라");
+						continue;
+					} else if (isJoinableLoginId(loginId) == false) {
+						System.out.println("이미 쓰는 아이디야");
+						continue;
+					}
+
+					break;
+				}
+
+				System.out.printf("로그인 비밀번호 : ");
+				String loginPw = sc.nextLine();
+				System.out.printf("로그인 비밀번호 확인 : ");
+				String loginPwConfirm = sc.nextLine();
+				System.out.printf("이름 : ");
+				String name = sc.nextLine();
+
+				Member member = new Member(id, regDate, regDate, loginId, loginPw, name);
+				members.add(member);
+
+				System.out.printf("%d번 회원이 가입되었습니다.\n", id);
+				lastMemberId++;
+			}
+
+			else if (command.startsWith("article list")) {
 				if (articles.size() == 0) {
 					System.out.println("게시글이 없습니다");
 					continue;
@@ -148,6 +185,27 @@ public class Main {
 		sc.close();
 	}
 
+	private static boolean isJoinableLoginId(String loginId) {
+		int index = getMemberIndexByLoginId(loginId);
+
+		if (index == -1) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private static int getMemberIndexByLoginId(String loginId) {
+		int i = 0;
+		for (Member member : members) {
+//			if (member.loginId == loginId) {     -> x
+			if (member.loginId.equals(loginId)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	private static int getArticleIndexById(int id) {
 
 		for (int i = 0; i < articles.size(); i++) {
@@ -200,5 +258,23 @@ class Article {
 		this.title = title;
 		this.body = body;
 		this.hit = hit;
+	}
+}
+
+class Member {
+	int id;
+	String regDate;
+	String updateDate;
+	String loginId;
+	String loginPw;
+	String name;
+
+	Member(int id, String regDate, String updateDate, String loginId, String loginPw, String name) {
+		this.id = id;
+		this.regDate = regDate;
+		this.updateDate = updateDate;
+		this.loginId = loginId;
+		this.loginPw = loginPw;
+		this.name = name;
 	}
 }
