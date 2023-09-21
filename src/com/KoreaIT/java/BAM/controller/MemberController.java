@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import com.KoreaIT.java.BAM.dto.Article;
 import com.KoreaIT.java.BAM.dto.Member;
 import com.KoreaIT.java.BAM.util.Util;
 
@@ -14,7 +15,10 @@ public class MemberController extends Controller {
 	private String actionMethodName;
 	private String command;
 
-	int lastMemberId = 0;
+	boolean isLogined = false;
+	Member loginedMember = null;
+
+	int lastMemberId = 3;
 
 	public MemberController(Scanner sc) {
 		this.members = new ArrayList<Member>();
@@ -29,10 +33,45 @@ public class MemberController extends Controller {
 		case "join":
 			doJoin();
 			break;
+		case "login":
+			doLogin();
+			break;
 		default:
 			System.out.println("그런 세부기능은 없어");
 			break;
 		}
+	}
+
+	private void doLogin() {
+//		if(isLogined == true) {
+//			System.out.println("이미 누가 로그인 했다");
+//			return;
+//		}
+
+		if (loginedMember != null) {
+			System.out.println("이미 누가 로그인 했다");
+			return;
+		}
+		System.out.printf("로그인 아이디 : ");
+		String loginId = sc.nextLine();
+		System.out.printf("로그인 비밀번호 : ");
+		String loginPw = sc.nextLine();
+
+		Member member = getMemberByLoginId(loginId);
+
+		if (member == null) {
+			System.out.println("너같은 회원은 없어");
+			return;
+		}
+		if (member.loginPw.equals(loginPw) == false) {
+			System.out.println("너 비번 틀림");
+			return;
+		}
+
+		isLogined = true;
+		loginedMember = member;
+
+		System.out.println("로그인 성공!");
 	}
 
 	public void doJoin() {
@@ -102,6 +141,16 @@ public class MemberController extends Controller {
 
 	}
 
+	private Member getMemberByLoginId(String loginId) {
+		int index = getMemberIndexByLoginId(loginId);
+
+		if (index == -1) {
+			return null;
+		}
+
+		return members.get(index);
+	}
+
 	private boolean isJoinableLoginId(String loginId) {
 		int index = getMemberIndexByLoginId(loginId);
 
@@ -118,8 +167,16 @@ public class MemberController extends Controller {
 			if (member.loginId.equals(loginId)) {
 				return i;
 			}
+			i++;
 		}
 		return -1;
+	}
+
+	public void makeTestData() {
+		System.out.println("테스트를 위한 회원 데이터 3개 생성 완료");
+		members.add(new Member(1, Util.getNow(), Util.getNow(), "test1", "test1", "회원1"));
+		members.add(new Member(2, Util.getNow(), Util.getNow(), "test2", "test2", "회원2"));
+		members.add(new Member(3, Util.getNow(), Util.getNow(), "test3", "test3", "회원3"));
 	}
 
 }
